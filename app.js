@@ -51,7 +51,7 @@ app.get('/campgrounds/:id', wrapAsync(async (req, res, next) => {
     if (!currentcamp) {
         throw new AppError("No product found with the given ID", 404);
     }
-    res.render('campgrounds/show', { title: 'Details', currentcamp });
+    res.render('campgrounds/show', { title: 'Details', currentcamp, defaultPrice: 10 });
 }));
 
 app.get('/campgrounds/:id/edit', wrapAsync(async (req, res) => {

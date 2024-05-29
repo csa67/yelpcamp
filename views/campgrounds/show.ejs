@@ -3,8 +3,8 @@
     <div class="column text-center">
     <img class="rounded mx-auto my-3 w-50 h-50" src=<%= currentcamp.image%>>
         <h1><%= currentcamp.title %></h1>
-        <h2 class="text-body-secondary"> Location: <%= currentcamp.loc%> </h2>
-        <small>Price: <%= currentcamp.price %></small>
+        <h3 class="text-body-secondary"> Location: <%= currentcamp.loc%> </h3>
+        <h3>Price: $<%= currentcamp.price || defaultPrice %></h3>
         
         <div class="row mb-3 justify-content-center">
             <div class="col-auto">
@@ -16,6 +16,5 @@
                 </form>
             </div>
         </div>
-        <a href="/campgrounds"> Back to all Campgrounds </a>
     </div>
 </div>
