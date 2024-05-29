@@ -4,6 +4,7 @@ const path = require('path');
 const campground = require('./model/campground');
 const { title } = require('process');
 const engine = require('ejs-mate');
+const Joi = require('joi');
 const methodOverride = require('method-override');
 const AppError = require('./utils/AppError')
 const wrapAsync = require('./utils/catchAsync')
@@ -25,6 +26,22 @@ app.use(methodOverride('_method'));
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
+const validateCampground = (req, res, next) => {
+    const campgroundSchema = Joi.object({
+        campground: Joi.object({
+            title: Joi.string().required(),
+            price: Joi.number().required()
+                .min(0)
+        }).required()
+    })
+    const result = campgroundSchema.validate(req.body);
+    if (result.error) {
+        throw new AppError(result.error.message, 405)
+    } else {
+        next();
+    }
+}
+
 app.get('/campgrounds', wrapAsync(async (req, res, next) => {
     const campgrounds = await campground.find({});
     res.render('campgrounds/index', { title: 'Campgrounds', campgrounds })
@@ -34,10 +51,9 @@ app.get('/campgrounds/new', wrapAsync(async (req, res, next) => {
     res.render('campgrounds/new', { title: 'Create New' });
 }));
 
-app.post('/campgrounds', wrapAsync(async (req, res, next) => {
+app.post('/campgrounds', validateCampground, wrapAsync(async (req, res, next) => {
     const newCamp = new campground(req.body.campground);
     await newCamp.save();
-
     res.redirect(`/campgrounds/${newCamp._id}`);
 }));
 
@@ -57,7 +73,7 @@ app.get('/campgrounds/:id/edit', wrapAsync(async (req, res, next) => {
     res.render('campgrounds/edit', { title: 'Edit campground', currentcamp });
 }));
 
-app.put('/campgrounds/:id', wrapAsync(async (req, res, next) => {
+app.put('/campgrounds/:id', validateCampground, wrapAsync(async (req, res, next) => {
     const id = req.params.id;
     const editedCamp = await campground.findByIdAndUpdate(id, { ...req.body.campground });
     res.redirect(`/campgrounds/${id}`);
