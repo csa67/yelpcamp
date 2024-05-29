@@ -1,0 +1,11 @@
+<% layout('Boilerplate') -%>
+    <h1><%= currentcamp.title %></h1>
+    <h2> Location: <%= currentcamp.loc%> </h2>
+
+    <p><a href="/campgrounds/<%= currentcamp._id%>/edit"> Edit </p>
+    <form action="/campgrounds/<%= currentcamp._id%>?_method=DELETE" method="POST">
+     <button> Delete </button>
+     </form>
+     <br>
+    <a href="/campgrounds"> Back to all Campgrounds </a>
+<% layout('Boilerplate') -%>
