@@ -1,11 +1,21 @@
 <% layout('Boilerplate') -%>
-    <h1><%= currentcamp.title %></h1>
-    <h2> Location: <%= currentcamp.loc%> </h2>
-
-    <p><a href="/campgrounds/<%= currentcamp._id%>/edit"> Edit </p>
-    <form action="/campgrounds/<%= currentcamp._id%>?_method=DELETE" method="POST">
-     <button> Delete </button>
-     </form>
-     <br>
-    <a href="/campgrounds"> Back to all Campgrounds </a>
-<% layout('Boilerplate') -%>
+<div class="row mb-3">
+    <div class="column text-center">
+    <img class="rounded mx-auto my-3 w-50 h-50" src=<%= currentcamp.image%>>
+        <h1><%= currentcamp.title %></h1>
+        <h2 class="text-body-secondary"> Location: <%= currentcamp.loc%> </h2>
+        <small>Price: <%= currentcamp.price %></small>
+        
+        <div class="row mb-3 justify-content-center">
+            <div class="col-auto">
+                <a href="/campgrounds/<%= currentcamp._id%>/edit" class="btn btn-primary">Edit</a>
+            </div>
+            <div class="col-auto">
+                <form action="/campgrounds/<%= currentcamp._id%>?_method=DELETE" method="POST">
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
+            </div>
+        </div>
+        <a href="/campgrounds"> Back to all Campgrounds </a>
+    </div>
+</div>

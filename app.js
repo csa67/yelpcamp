@@ -74,6 +74,10 @@ app.delete('/campgrounds/:id', wrapAsync(async (req, res) => {
     res.redirect(`/campgrounds`);
 }));
 
+app.get("/", (req, res) => {
+    res.render('home', { title: "YelpCamp" })
+})
+
 app.use((err, req, res, next) => {
     const { statusCode = 500, message = "Something went wrong" } = err;
     res.status(statusCode).send(message);
