@@ -5,7 +5,8 @@ const campground = require('./model/campground');
 const { title } = require('process');
 const engine = require('ejs-mate');
 const methodOverride = require('method-override');
-const AppError = require('./model/AppError')
+const AppError = require('./utils/AppError')
+const wrapAsync = require('./utils/catchAsync')
 
 mongoose.connect('mongodb://127.0.0.1:27017/yelpcamp');
 
@@ -24,22 +25,16 @@ app.use(methodOverride('_method'));
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
-function wrapAsync(fn) {
-    return function (req, res, next) {
-        fn(req, res, next).catch(e => next(e));
-    }
-}
-
 app.get('/campgrounds', wrapAsync(async (req, res, next) => {
     const campgrounds = await campground.find({});
     res.render('campgrounds/index', { title: 'Campgrounds', campgrounds })
 }));
 
-app.get('/campgrounds/new', wrapAsync(async (req, res) => {
+app.get('/campgrounds/new', wrapAsync(async (req, res, next) => {
     res.render('campgrounds/new', { title: 'Create New' });
 }));
 
-app.post('/campgrounds', wrapAsync(async (req, res) => {
+app.post('/campgrounds', wrapAsync(async (req, res, next) => {
     const newCamp = new campground(req.body.campground);
     await newCamp.save();
 
@@ -54,7 +49,7 @@ app.get('/campgrounds/:id', wrapAsync(async (req, res, next) => {
     res.render('campgrounds/show', { title: 'Details', currentcamp, defaultPrice: 10 });
 }));
 
-app.get('/campgrounds/:id/edit', wrapAsync(async (req, res) => {
+app.get('/campgrounds/:id/edit', wrapAsync(async (req, res, next) => {
     const currentcamp = await campground.findById(req.params.id)
     if (!currentcamp) {
         throw new AppError("No product found with the given ID", 404);
@@ -62,13 +57,13 @@ app.get('/campgrounds/:id/edit', wrapAsync(async (req, res) => {
     res.render('campgrounds/edit', { title: 'Edit campground', currentcamp });
 }));
 
-app.put('/campgrounds/:id', wrapAsync(async (req, res) => {
+app.put('/campgrounds/:id', wrapAsync(async (req, res, next) => {
     const id = req.params.id;
     const editedCamp = await campground.findByIdAndUpdate(id, { ...req.body.campground });
     res.redirect(`/campgrounds/${id}`);
 }));
 
-app.delete('/campgrounds/:id', wrapAsync(async (req, res) => {
+app.delete('/campgrounds/:id', wrapAsync(async (req, res, next) => {
     const id = req.params.id;
     await campground.findByIdAndDelete(id);
     res.redirect(`/campgrounds`);
@@ -78,9 +73,13 @@ app.get("/", (req, res) => {
     res.render('home', { title: "YelpCamp" })
 })
 
+app.all("*", (req, res, next) => {
+    next(new AppError("Page Not Found", 404));
+});
+
 app.use((err, req, res, next) => {
     const { statusCode = 500, message = "Something went wrong" } = err;
-    res.status(statusCode).send(message);
+    res.status(statusCode).render('error', { title: "Error", err });
 });
 
 app.listen(3000, () => {
