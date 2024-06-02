@@ -25,15 +25,29 @@ const validateCampground = (req, res, next) => {
     }
 }
 
-router.get('/new', wrapAsync(async (req, res, next) => {
+router.get('/', wrapAsync(async (req, res, next) => {
+    const campgrounds = await Campground
+        .find({});
+    res.render('campgrounds/index', { title: 'Campgrounds', campgrounds })
+}));
+
+router.get('/new', (req, res) => {
     res.render('campgrounds/new', { title: 'Create New' });
+});
+
+router.post('/', validateCampground, wrapAsync(async (req, res, next) => {
+    const newCamp = new Campground(req.body.Campground);
+    await newCamp.save();
+    req.flash('success', 'Successfully created a new campground!');
+    res.redirect(`/campgrounds/${newCamp._id}`);
 }));
 
 router.get('/:id', wrapAsync(async (req, res, next) => {
     const currentcamp = await Campground
         .findById(req.params.id).populate('reviews')
     if (!currentcamp) {
-        throw new AppError("No product found with the given ID", 404);
+        req.flash('error', 'Cannot find that campground!');
+        return res.redirect('/campgrounds');
     }
     res.render('campgrounds/show', { title: 'Details', currentcamp, defaultPrice: 10 });
 }));
@@ -41,7 +55,8 @@ router.get('/:id', wrapAsync(async (req, res, next) => {
 router.get('/:id/edit', wrapAsync(async (req, res, next) => {
     const currentcamp = await Campground.findById(req.params.id)
     if (!currentcamp) {
-        throw new AppError("No product found with the given ID", 404);
+        req.flash('error', 'Cannot find that campground!');
+        return res.redirect('/campgrounds');
     }
     res.render('campgrounds/edit', { title: 'Edit Campground', currentcamp });
 }));
@@ -56,24 +71,14 @@ router.put('/:id', validateCampground, wrapAsync(async (req, res, next) => {
     res.redirect(`/campgrounds/${id}`);
 }));
 
-router.delete('/campgrounds/:id', wrapAsync(async (req, res, next) => {
+router.delete('/:id', wrapAsync(async (req, res, next) => {
     const id = req.params.id;
     await Campground
         .findByIdAndDelete(id);
+    req.flash('success', 'Deletion of campground successful!');
     res.redirect(`/campgrounds`);
 }));
 
-router.get('/', wrapAsync(async (req, res, next) => {
-    const campgrounds = await Campground
-        .find({});
-    res.render('campgrounds/index', { title: 'Campgrounds', campgrounds })
-}));
 
-router.post('/', validateCampground, wrapAsync(async (req, res, next) => {
-    const newCamp = new Campground(req.body.Campground);
-    await newCamp.save();
-    req.flash('success', 'Successfully created a new campground!')
-    res.redirect(`/campgrounds/${newCamp._id}`);
-}));
 
 module.exports = router;

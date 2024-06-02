@@ -20,32 +20,32 @@ db.once("open", () => {
 const app = express();
 
 app.engine('ejs', engine);
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'));
+
 app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride('_method'));
+app.use(express.static(path.join(__dirname, 'public')))
 
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'ejs');
-
-const sessionConfig = session({
+const sessionConfig = {
     secret: 'temporarySecret',
     resave: false,
     saveUninitialized: false,
     cookie: {
         maxAge: 1000 * 60 * 60 * 24
     }
-})
+}
 app.use(session(sessionConfig))
 app.use(flash());
-
-app.use('/campgrounds', campgroundsRoute)
-app.use('/campgrounds/:id/reviews', reviewRoute)
-app.use(express.static(path.join(__dirname, 'public')))
 
 app.use((req, res, next) => {
     res.locals.success = req.flash('success');
     res.locals.error = req.flash('error');
     next();
 })
+
+app.use('/campgrounds', campgroundsRoute)
+app.use('/campgrounds/:id/reviews', reviewRoute)
 
 app.get("/", (req, res) => {
     res.render('home', { title: "YelpCamp" })
