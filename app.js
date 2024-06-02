@@ -1,6 +1,8 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const path = require('path');
+const session = require('express-session');
+const flash = require('connect-flash')
 const campgroundsRoute = require('./routes/campground');
 const reviewRoute = require('./routes/reviews');
 const engine = require('ejs-mate');
@@ -24,9 +26,26 @@ app.use(methodOverride('_method'));
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
+const sessionConfig = session({
+    secret: 'temporarySecret',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+        maxAge: 1000 * 60 * 60 * 24
+    }
+})
+app.use(session(sessionConfig))
+app.use(flash());
+
 app.use('/campgrounds', campgroundsRoute)
 app.use('/campgrounds/:id/reviews', reviewRoute)
 app.use(express.static(path.join(__dirname, 'public')))
+
+app.use((req, res, next) => {
+    res.locals.success = req.flash('success');
+    res.locals.error = req.flash('error');
+    next();
+})
 
 app.get("/", (req, res) => {
     res.render('home', { title: "YelpCamp" })
