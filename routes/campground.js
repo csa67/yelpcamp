@@ -25,13 +25,21 @@ const validateCampground = (req, res, next) => {
     }
 }
 
+const requireLogin = (req, res, next) => {
+    if (!req.session.user_id) {
+        req.flash('error', 'You need to login first.');
+        return res.redirect('/login');
+    }
+    next();
+}
+
 router.get('/', wrapAsync(async (req, res, next) => {
     const campgrounds = await Campground
         .find({});
     res.render('campgrounds/index', { title: 'Campgrounds', campgrounds })
 }));
 
-router.get('/new', (req, res) => {
+router.get('/new', requireLogin, (req, res) => {
     res.render('campgrounds/new', { title: 'Create New' });
 });
 
