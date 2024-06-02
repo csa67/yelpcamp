@@ -2,18 +2,26 @@
     <form action="/signup" method="POST" class="validateform" novalidate>
         <div class="form-group">
             <label for="inputEmail">Email address</label>
-            <input type="email" class="form-control" id="inputEmail" aria-describedby="emailHelp" name="email"
+            <input type="email" class="form-control" id="inputEmail" aria-describedby="emailHelp" name="user[email]"
                 placeholder="Enter email" required>
             <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>
         </div>
         <div class="form-group">
             <label for="inputUsername">Username</label>
-            <input type="text" class="form-control" id="inputUsername" name="username" placeholder="Username" required>
+            <input type="text" class="form-control" id="inputUsername" name="user[username]" pattern="[a-zA-Z0-9]{6,30}"
+                placeholder="Username" required>
+            <div class="invalid-feedback">
+                Username must be 6-30 characters long and contain only letters and numbers.
+            </div>
         </div>
         <div class="form-group">
             <label for="inputPassword">Password</label>
-            <input type="password" class="form-control" id="inputPassword" name="password" placeholder="Password"
-                required>
+            <input type="password" class="form-control" id="inputPassword" name="user[password]"
+                pattern="^[a-zA-Z0-9,!.$#%&]{8,30}$" placeholder="Password" required>
+            <div class="invalid-feedback">
+                Password must be 8-30 characters long and contain only letters, numbers, or the following special
+                characters: ,!.$#%&
+            </div>
         </div>
         <button type="submit" class="btn btn-primary">Sign Up</button>
         <div class="my-3">

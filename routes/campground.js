@@ -50,7 +50,7 @@ router.post('/', validateCampground, wrapAsync(async (req, res, next) => {
     res.redirect(`/campgrounds/${newCamp._id}`);
 }));
 
-router.get('/:id', wrapAsync(async (req, res, next) => {
+router.get('/:id', requireLogin, wrapAsync(async (req, res, next) => {
     const currentcamp = await Campground
         .findById(req.params.id).populate('reviews')
     if (!currentcamp) {
