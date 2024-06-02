@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const campground = require('../model/campground');
+const campground = require('../model/Campground');
 const { title } = require('process');
 const cities = require('./cities');
 const { places, descriptors } = require('./seedHelpers');

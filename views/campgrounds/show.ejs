@@ -1,20 +1,45 @@
 <% layout('Boilerplate') -%>
-<div class="row mb-3">
-    <div class="column text-center">
-    <img class="rounded mx-auto my-3 w-50 h-50" src=<%= currentcamp.image%>>
-        <h1><%= currentcamp.title %></h1>
-        <h3 class="text-body-secondary"> Location: <%= currentcamp.loc%> </h3>
-        <h3>Price: $<%= currentcamp.price || defaultPrice %>/night</h3>
-        
-        <div class="row mb-3 justify-content-center">
-            <div class="col-auto">
-                <a href="/campgrounds/<%= currentcamp._id%>/edit" class="btn btn-primary">Edit</a>
+    <div class="row mb-3">
+        <div class="column">
+            <div class="column text-center">
+                <img class="rounded mx-auto my-3 w-50 h-50" src=<%=currentcamp.image%>>
+                <h1>
+                    <%= currentcamp.title %>
+                </h1>
+                <h3 class="text-body-secondary"> Location: <%= currentcamp.loc%>
+                </h3>
+                <h3>Price: $<%= currentcamp.price || defaultPrice %>/night</h3>
+
+                <div class="row mb-3 justify-content-center">
+                    <div class="col-auto">
+                        <a href="/campgrounds/<%= currentcamp._id%>/edit" class="btn btn-primary">Edit</a>
+                    </div>
+                    <div class="col-auto">
+                        <form action="/campgrounds/<%= currentcamp._id%>?_method=DELETE" method="POST">
+                            <button type="submit" class="btn btn-danger">Delete</button>
+                        </form>
+                    </div>
+                </div>
             </div>
-            <div class="col-auto">
-                <form action="/campgrounds/<%= currentcamp._id%>?_method=DELETE" method="POST">
-                    <button type="submit" class="btn btn-danger">Delete</button>
-                </form>
-            </div>
+            <h2>Leave a review</h2>
+            <form action="/campgrounds/<%=currentcamp._id%>/reviews" method="POST" class="validateform" novalidate>
+                <div class="mb-3">
+                    <label for="rating" class="form-label"> Rating </label>
+                    <input type="range" class="form-range" name="review[rating]" min="1" max="5" id="rating" />
+                </div>
+
+                <div class="mb-3">
+                    <label for="body" class="form-label"> Review </label>
+                    <textarea class="form-control" id="body" name="review[reviewText]" placeholder="Add a review"
+                        rows="4" required></textarea>
+                </div>
+
+                <button class="btn btn-info">Add Review</button>
+            </form>
+
+            <% for(let rev of currentcamp.reviews){ %>
+                <h3>
+                    Review: <%=rev.reviewText%> Rating: <%=rev.rating%>/5 </h3>
+                <% } %>
         </div>
     </div>
-</div>
