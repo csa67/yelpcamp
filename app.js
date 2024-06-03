@@ -53,7 +53,7 @@ app.use('/campgrounds', campgroundsRoute)
 app.use('/campgrounds/:id/reviews', reviewRoute)
 
 app.get("/", (req, res) => {
-    res.render('login/register', { title: 'Register' });
+    res.render('home', { title: 'Yelpcamp' });
 })
 
 app.all("*", (req, res, next) => {

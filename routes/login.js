@@ -39,8 +39,6 @@ const validateUser = (type) => {
     };
 };
 
-
-
 router.get("/login", (req, res) => {
     res.render('login/login', { title: 'Login' })
 })
@@ -64,6 +62,10 @@ router.post("/login", validateUser('login'), wrapAsync(async (req, res, next) =>
     }
 }))
 
+router.get('/signup', (req, res) => {
+    res.render('login/register', { title: 'Register' });
+})
+
 router.post("/signup", validateUser('signup'), wrapAsync(async (req, res, next) => {
     const { email, username, password } = req.body.user;
     const hashedPassword = await bcrypt.hash(password, 14);
@@ -73,6 +75,12 @@ router.post("/signup", validateUser('signup'), wrapAsync(async (req, res, next) 
     req.flash('success', 'Succesfully Registered!');
     res.redirect('/campgrounds');
 }));
+
+router.get("/logout", (req, res) => {
+    req.flash('success', 'Logged out successfully!');
+    res.redirect('/campgrounds');
+    req.session.user_id = null;
+})
 
 module.exports = router;
 
