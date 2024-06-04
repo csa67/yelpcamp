@@ -4,6 +4,7 @@ const Campground = require('../model/campground');
 const wrapAsync = require('../utils/catchAsync');
 const AppError = require('../utils/AppError')
 const Joi = require('joi');
+const { requireLogin } = require('../utils/authenticate,js');
 
 const validateCampground = (req, res, next) => {
     const campgroundSchema = Joi.object({
@@ -19,18 +20,10 @@ const validateCampground = (req, res, next) => {
     const { result } = campgroundSchema.validate(req.body);
     if (result) {
         const msg = result.details.map(el => el.message).join(',');
-        throw new AppError(message, 405)
+        throw new AppError(msg, 405)
     } else {
         next();
     }
-}
-
-const requireLogin = (req, res, next) => {
-    if (!req.session.user_id) {
-        req.flash('error', 'You need to login first.');
-        return res.redirect('/login');
-    }
-    next();
 }
 
 router.get('/', wrapAsync(async (req, res, next) => {
@@ -50,7 +43,7 @@ router.post('/', validateCampground, wrapAsync(async (req, res, next) => {
     res.redirect(`/campgrounds/${newCamp._id}`);
 }));
 
-router.get('/:id', requireLogin, wrapAsync(async (req, res, next) => {
+router.get('/:id', wrapAsync(async (req, res, next) => {
     const currentcamp = await Campground
         .findById(req.params.id).populate('reviews')
     if (!currentcamp) {
@@ -60,7 +53,7 @@ router.get('/:id', requireLogin, wrapAsync(async (req, res, next) => {
     res.render('campgrounds/show', { title: 'Details', currentcamp, defaultPrice: 10 });
 }));
 
-router.get('/:id/edit', wrapAsync(async (req, res, next) => {
+router.get('/:id/edit', requireLogin, wrapAsync(async (req, res, next) => {
     const currentcamp = await Campground.findById(req.params.id)
     if (!currentcamp) {
         req.flash('error', 'Cannot find that campground!');
@@ -79,7 +72,7 @@ router.put('/:id', validateCampground, wrapAsync(async (req, res, next) => {
     res.redirect(`/campgrounds/${id}`);
 }));
 
-router.delete('/:id', wrapAsync(async (req, res, next) => {
+router.delete('/:id', requireLogin, wrapAsync(async (req, res, next) => {
     const id = req.params.id;
     await Campground
         .findByIdAndDelete(id);

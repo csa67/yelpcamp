@@ -5,6 +5,7 @@ const wrapAsync = require('../utils/catchAsync');
 const AppError = require('../utils/AppError');
 const Review = require('../model/review');
 const Joi = require('joi');
+const { requireLogin } = require('../utils/authenticate,js');
 const { error } = require('console');
 
 const validateReview = (req, res, next) => {
@@ -25,7 +26,7 @@ const validateReview = (req, res, next) => {
     }
 }
 
-router.post('/', validateReview, wrapAsync(async (req, res, next) => {
+router.post('/', requireLogin, validateReview, wrapAsync(async (req, res, next) => {
     const camp = await Campground
         .findById(req.params.id);
     const review = new Review(req.body.review);
