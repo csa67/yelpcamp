@@ -12,7 +12,7 @@ const AppError = require('./utils/AppError');
 const wrapAsync = require('./utils/catchAsync');
 const bcrypt = require('bcrypt');
 const User = require('./model/user');
-const { isLoggedIn } = require('./utils/authenticate,js');
+const { isLoggedIn } = require('./utils/authenticate.js');
 
 mongoose.connect('mongodb://127.0.0.1:27017/yelpcamp');
 

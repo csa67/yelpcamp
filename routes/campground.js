@@ -1,10 +1,11 @@
 const express = require('express')
 const router = express.Router();
 const Campground = require('../model/campground');
+const User = require('../model/user.js')
 const wrapAsync = require('../utils/catchAsync');
 const AppError = require('../utils/AppError')
 const Joi = require('joi');
-const { requireLogin } = require('../utils/authenticate,js');
+const { requireLogin } = require('../utils/authenticate.js');
 
 const validateCampground = (req, res, next) => {
     const campgroundSchema = Joi.object({
@@ -17,14 +18,24 @@ const validateCampground = (req, res, next) => {
                 desc: Joi.string()
             }).required()
     })
-    const { result } = campgroundSchema.validate(req.body);
-    if (result) {
-        const msg = result.details.map(el => el.message).join(',');
+    const { error } = campgroundSchema.validate(req.body);
+    if (error) {
+        const msg = error.details.map(el => el.message).join(',');
         throw new AppError(msg, 405)
     } else {
         next();
     }
 }
+
+const isAuthor = wrapAsync(async (req, res, next) => {
+    const { id } = req.params;
+    const campground = await Campground.findById(id);
+    if (!campground.author._id.equals(req.session.user_id)) {
+        req.flash('error', 'You do not have permission to do this.');
+        return res.redirect(`/campgrounds/${id}`);
+    }
+    next();
+})
 
 router.get('/', wrapAsync(async (req, res, next) => {
     const campgrounds = await Campground
@@ -36,8 +47,9 @@ router.get('/new', requireLogin, (req, res) => {
     res.render('campgrounds/new', { title: 'Create New' });
 });
 
-router.post('/', validateCampground, wrapAsync(async (req, res, next) => {
+router.post('/', requireLogin, validateCampground, wrapAsync(async (req, res, next) => {
     const newCamp = new Campground(req.body.Campground);
+    newCamp.author = req.session.user_id;
     await newCamp.save();
     req.flash('success', 'Successfully created a new campground!');
     res.redirect(`/campgrounds/${newCamp._id}`);
@@ -45,15 +57,16 @@ router.post('/', validateCampground, wrapAsync(async (req, res, next) => {
 
 router.get('/:id', wrapAsync(async (req, res, next) => {
     const currentcamp = await Campground
-        .findById(req.params.id).populate('reviews')
+        .findById(req.params.id).populate('reviews').populate('author')
+    const currentUser = await User.findById(req.session.user_id);
     if (!currentcamp) {
         req.flash('error', 'Cannot find that campground!');
         return res.redirect('/campgrounds');
     }
-    res.render('campgrounds/show', { title: 'Details', currentcamp, defaultPrice: 10 });
+    res.render('campgrounds/show', { title: 'Details', currentcamp, defaultPrice: 10, currentUser });
 }));
 
-router.get('/:id/edit', requireLogin, wrapAsync(async (req, res, next) => {
+router.get('/:id/edit', requireLogin, isAuthor, wrapAsync(async (req, res, next) => {
     const currentcamp = await Campground.findById(req.params.id)
     if (!currentcamp) {
         req.flash('error', 'Cannot find that campground!');
@@ -62,7 +75,7 @@ router.get('/:id/edit', requireLogin, wrapAsync(async (req, res, next) => {
     res.render('campgrounds/edit', { title: 'Edit Campground', currentcamp });
 }));
 
-router.put('/:id', validateCampground, wrapAsync(async (req, res, next) => {
+router.put('/:id', isAuthor, validateCampground, wrapAsync(async (req, res, next) => {
     const id = req.params.id;
     const editedCamp = await Campground
         .findByIdAndUpdate(id, {
@@ -72,7 +85,7 @@ router.put('/:id', validateCampground, wrapAsync(async (req, res, next) => {
     res.redirect(`/campgrounds/${id}`);
 }));
 
-router.delete('/:id', requireLogin, wrapAsync(async (req, res, next) => {
+router.delete('/:id', requireLogin, isAuthor, wrapAsync(async (req, res, next) => {
     const id = req.params.id;
     await Campground
         .findByIdAndDelete(id);

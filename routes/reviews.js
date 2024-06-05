@@ -5,8 +5,8 @@ const wrapAsync = require('../utils/catchAsync');
 const AppError = require('../utils/AppError');
 const Review = require('../model/review');
 const Joi = require('joi');
-const { requireLogin } = require('../utils/authenticate,js');
-const { error } = require('console');
+const { requireLogin } = require('../utils/authenticate.js');
+const User = require('../model/user');
 
 const validateReview = (req, res, next) => {
     const reviewSchema = Joi.object({
@@ -26,7 +26,18 @@ const validateReview = (req, res, next) => {
     }
 }
 
-router.delete('/:reviewId', requireLogin, wrapAsync(async (req, res, next) => {
+const isReviewAuthor = async (req, res, next) => {
+    const { reviewId } = req.params;
+    const review = await Review.findById(reviewId);
+    const currentUser = await User.findById(req.session.user_id);
+    if (!review.userName === currentUser.username) {
+        req.flash('error', 'You do not have permission to do this.');
+        return res.redirect(`/campgrounds/${id}`);
+    }
+    next();
+}
+
+router.delete('/:reviewId', requireLogin, isReviewAuthor, wrapAsync(async (req, res, next) => {
     const { id, reviewId } = req.params;
     await Campground.findByIdAndDelete(id, { $pull: { reviews: reviewId } })
     await Review.findByIdAndDelete(reviewId)
@@ -38,6 +49,8 @@ router.post('/', requireLogin, validateReview, wrapAsync(async (req, res, next) 
     const camp = await Campground
         .findById(req.params.id);
     const review = new Review(req.body.review);
+    const currentUser = await User.findById(req.session.user_id);
+    review.userName = currentUser.username;
     camp.reviews.push(review);
     await review.save();
     await camp.save();
