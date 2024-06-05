@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const campground = require('../model/Campground');
+const campground = require('../model/campground');
 const { title } = require('process');
 const cities = require('./cities');
 const { places, descriptors } = require('./seedHelpers');
@@ -20,6 +20,7 @@ const seedDB = async () => {
     for (let i = 0; i < 50; i++) {
         const city = cities[Math.floor(Math.random() * 1000)];
         const camp = new campground({
+            author: '665d065eea80b3c517b927c9',
             loc: `${city.city}, ${city.state}`,
             title: `${getRandomEle(descriptors)} ${getRandomEle(places)}`,
             desc: "This place has 100 studio units of affordable housing with supportive services for people with significant disabling conditions like serious mental illness, substance use disorders, and physical disabilities.",

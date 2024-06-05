@@ -40,6 +40,9 @@
             <% for(let rev of currentcamp.reviews){ %>
                 <h3>
                     Review: <%=rev.reviewText%> Rating: <%=rev.rating%>/5 </h3>
+                <form action="/campgrounds/<%= currentcamp._id%>/reviews/<%=rev._id%>?_method=DELETE" method="POST">
+                    <button class="btn btn-danger">Delete</button>
+                </form>
                 <% } %>
         </div>
     </div>

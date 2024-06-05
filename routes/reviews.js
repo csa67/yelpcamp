@@ -20,11 +20,19 @@ const validateReview = (req, res, next) => {
     const { result } = reviewSchema.validate(req.body);
     if (result) {
         const msg = result.details.map(el => el.message).join(',');
-        throw new AppError(message, 405)
+        throw new AppError(msg, 405)
     } else {
         next();
     }
 }
+
+router.delete('/:reviewId', requireLogin, wrapAsync(async (req, res, next) => {
+    const { id, reviewId } = req.params;
+    await Campground.findByIdAndDelete(id, { $pull: { reviews: reviewId } })
+    await Review.findByIdAndDelete(reviewId)
+    req.flash('success', 'Deletion of review successful!');
+    res.redirect(`/campgrounds`);
+}))
 
 router.post('/', requireLogin, validateReview, wrapAsync(async (req, res, next) => {
     const camp = await Campground
