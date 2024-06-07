@@ -6,6 +6,7 @@ const wrapAsync = require('../utils/catchAsync');
 const AppError = require('../utils/AppError')
 const Joi = require('joi');
 const { requireLogin } = require('../utils/authenticate.js');
+const { uploadToCloud, storeInCloud } = require('../helper.js');
 
 const validateCampground = (req, res, next) => {
     const campgroundSchema = Joi.object({
@@ -47,13 +48,24 @@ router.get('/new', requireLogin, (req, res) => {
     res.render('campgrounds/new', { title: 'Create New' });
 });
 
-router.post('/', requireLogin, validateCampground, wrapAsync(async (req, res, next) => {
-    const newCamp = new Campground(req.body.Campground);
+
+router.post('/', requireLogin, storeInCloud.array('image'), validateCampground, wrapAsync(async (req, res, next) => {
+    const images = [];
+
+    for (const file of req.files) {
+        const result = await uploadToCloud(file.buffer, file.mimetype);
+        images.push({ url: result.secure_url });
+    }
+
+    const newCamp = new Campground(req.body.campground);
     newCamp.author = req.session.user_id;
+    newCamp.images = images;
+    console.log(newCamp);
     await newCamp.save();
     req.flash('success', 'Successfully created a new campground!');
     res.redirect(`/campgrounds/${newCamp._id}`);
-}));
+
+}))
 
 router.get('/:id', wrapAsync(async (req, res, next) => {
     const currentcamp = await Campground

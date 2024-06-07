@@ -1,32 +1,39 @@
 <% layout('Boilerplate') -%>
-<div class="card my-3 p-3">
-    <h1 class="text-center">Create New Campground</h1>
-    <form action="/campgrounds" method="POST" novalidate class="validateform">
-    <div class="my-3">
-        <label for="title" class="form-label"> Title </label>
-        <input class="form-control" type="text" id="title" name="campground[title]" placeholder="title" required/>
-    </div>
-    <div class="mb-3">
-        <label for="location" class="form-label"> Location </label>
-        <input class="form-control" type="text" id="location" name="campground[loc]" placeholder="location" required/>
-    </div>
+    <div class="card my-3 p-3">
+        <h1 class="text-center">Create New Campground</h1>
+        <form action="/campgrounds" method="POST" novalidate class="validateform" enctype="multipart/form-data">
+            <div class="my-3">
+                <label for="title" class="form-label"> Title </label>
+                <input class="form-control" type="text" id="title" name="campground[title]" placeholder="title"
+                    required />
+            </div>
+            <div class="mb-3">
+                <label for="location" class="form-label"> Location </label>
+                <input class="form-control" type="text" id="location" name="campground[loc]" placeholder="location"
+                    required />
+            </div>
 
-    <div class="mb-3">
-    <label for="price" class="form-label"> Price </label>
-    <div class="input-group">
-        <span class="input-group-text">$</span>
-        <input type="number" class="form-control id="price" name="campground[price]" placeholder="0.00" step="0.01" aria-label="Amount (in dollar)" required/>    
-    </div>
-    </div>
+            <div class="mb-3">
+                <input type="file" name="image" multiple />
+            </div>
 
-    <div class="mb-3">
-        <label for="description" class="form-label"> Description </label>
-        <textarea class="form-control" type="text" id="description" name="campground[desc]" placeholder="Enter description" rows=4></textarea>
-    </div>
+            <div class="mb-3">
+                <label for="price" class="form-label"> Price </label>
+                <div class="input-group">
+                    <span class="input-group-text">$</span>
+                    <input type="number" class="form-control" id="price" name="campground[price]" placeholder="0.00"
+                        step="0.01" aria-label="Amount (in dollar)" required />
+                </div>
+            </div>
 
-    <div class="text-center"> 
-        <button class="btn btn-success" >Submit </button>
-    </div>
-    </form>
-</div>
+            <div class="mb-3">
+                <label for="description" class="form-label"> Description </label>
+                <textarea class="form-control" type="text" id="description" name="campground[desc]"
+                    placeholder="Enter description" rows=4></textarea>
+            </div>
 
+            <div class="text-center">
+                <button class="btn btn-success">Submit </button>
+            </div>
+        </form>
+    </div>
