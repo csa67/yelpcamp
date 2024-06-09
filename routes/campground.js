@@ -16,7 +16,8 @@ const validateCampground = (req, res, next) => {
                 price: Joi.number().required()
                     .min(0),
                 loc: Joi.string(),
-                desc: Joi.string()
+                desc: Joi.string(),
+                images: Joi.object(),
             }).required()
     })
     const { error } = campgroundSchema.validate(req.body);
@@ -24,6 +25,7 @@ const validateCampground = (req, res, next) => {
         const msg = error.details.map(el => el.message).join(',');
         throw new AppError(msg, 405)
     } else {
+        console.log("Validated camp")
         next();
     }
 }
@@ -49,7 +51,7 @@ router.get('/new', requireLogin, (req, res) => {
 });
 
 
-router.post('/', requireLogin, storeInCloud.array('image'), validateCampground, wrapAsync(async (req, res, next) => {
+router.post('/', requireLogin, storeInCloud.array('images'), validateCampground, wrapAsync(async (req, res, next) => {
     const images = [];
 
     for (const file of req.files) {
@@ -87,15 +89,46 @@ router.get('/:id/edit', requireLogin, isAuthor, wrapAsync(async (req, res, next)
     res.render('campgrounds/edit', { title: 'Edit Campground', currentcamp });
 }));
 
-router.put('/:id', isAuthor, validateCampground, wrapAsync(async (req, res, next) => {
-    const id = req.params.id;
-    const editedCamp = await Campground
-        .findByIdAndUpdate(id, {
-            ...req.body.Campground
+// router.put('/:id', requireLogin, isAuthor, storeInCloud.array('images'), validateCampground, wrapAsync(async (req, res, next) => {
+//     const editedCamp = await Campground.findById(req.params.id);
+//     for (const file of req.files) {
+//         const result = await uploadToCloud(file.buffer, file.mimetype);
+//         editedCamp.images.push({ url: result.secure_url });
+//     }
 
-        });
-    res.redirect(`/campgrounds/${id}`);
+//     Object.assign(editedCamp, req.body.campground);
+//     await editedCamp.save();
+
+//     req.flash('success', 'Campground successfully updated!');
+//     res.redirect(`/campgrounds/${req.params.id}`);
+// }));
+
+router.put('/:id', requireLogin, isAuthor, storeInCloud.array('campimg'), validateCampground, wrapAsync(async (req, res, next) => {
+    console.log('Editing campground...');
+
+    const editedCamp = await Campground.findById(req.params.id);
+    console.log('Found campground:', editedCamp);
+
+    const images = [];
+
+    for (const file of req.files) {
+        const result = await uploadToCloud(file.buffer, file.mimetype);
+        images.push({ url: result.secure_url });
+    }
+
+    console.log('Updated campground with images:', editedCamp);
+
+    Object.assign(editedCamp, req.body.campground);
+    console.log('Updated campground:', editedCamp);
+
+    editedCamp.images.push(...images);
+    await editedCamp.save();
+    console.log('Campground saved.');
+
+    req.flash('success', 'Campground successfully updated!');
+    res.redirect(`/campgrounds/${req.params.id}`);
 }));
+
 
 router.delete('/:id', requireLogin, isAuthor, wrapAsync(async (req, res, next) => {
     const id = req.params.id;
