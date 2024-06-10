@@ -13,9 +13,12 @@
                 <input class="form-control" type="text" id="location" name="campground[loc]"
                     value="<%=currentcamp.loc%>" placeholder="location" required />
             </div>
-
-            <input class="form-control" type="file" name="campimg" id="formFileMultiple" placeholder="Add more images"
-                multiple>
+            <div class="mb-3">
+                <label for="formFileMultiple" class="form-label">Images</label>
+                <input class="form-control" type="file" name="campimg" id="formFileMultiple"
+                    placeholder="Add more Images" multiple>
+                <div id="error-message" class="text-danger mt-2"></div>
+            </div>
 
             <div class="mb-3">
                 <label for="price" class="form-label"> Price </label>
