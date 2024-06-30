@@ -1,8 +1,13 @@
+if (process.env.NODE_ENV !== "production") {
+    require("dotenv").config()
+}
 const mongoose = require('mongoose');
 const campground = require('../model/campground');
 const { title } = require('process');
 const cities = require('./cities');
 const { places, descriptors } = require('./seedHelpers');
+const maptilerClient = require("@maptiler/client");
+maptilerClient.config.apiKey = process.env.MAPTILER_API_KEY;
 
 mongoose.connect('mongodb://127.0.0.1:27017/yelpcamp');
 
@@ -19,9 +24,12 @@ const seedDB = async () => {
     await campground.deleteMany({});
     for (let i = 0; i < 50; i++) {
         const city = cities[Math.floor(Math.random() * 1000)];
+        const location = `${city.city}, ${city.state}`;
+        const geoData = await maptilerClient.geocoding.forward(location, { limit: 1 });
         const camp = new campground({
             author: '665d065eea80b3c517b927c9',
-            loc: `${city.city}, ${city.state}`,
+            loc: location,
+            geometry: geoData.features[0].geometry,
             title: `${getRandomEle(descriptors)} ${getRandomEle(places)}`,
             desc: "This place has 100 studio units of affordable housing with supportive services for people with significant disabling conditions like serious mental illness, substance use disorders, and physical disabilities.",
             images: {

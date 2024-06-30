@@ -1,10 +1,13 @@
-<%layout('./Boilerplate') -%>
-<div class="row my-3">
+<%layout("./Boilerplate") -%>
+  <div class="row my-3">
     <div class="col-6 offset-3">
-    
-<div class="alert alert-danger" role="alert">
-  <h4 class="alert-heading">Error <%=err.statusCode%>!</h4>
-  <p><%=err.message%></p>
-  <hr></div>
-</div>
-</div>
+
+      <div class="alert alert-danger" role="alert">
+        <h4 class="alert-heading">Error <%=err.statusCode%>!</h4>
+        <p>
+          <%=err.message%>
+        </p>
+        <hr>
+      </div>
+    </div>
+  </div>

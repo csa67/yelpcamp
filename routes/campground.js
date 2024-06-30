@@ -7,6 +7,8 @@ const AppError = require('../utils/AppError')
 const Joi = require('joi');
 const { requireLogin } = require('../utils/authenticate.js');
 const { uploadToCloud, storeInCloud } = require('../helper.js');
+const maptilerClient = require("@maptiler/client");
+maptilerClient.config.apiKey = process.env.MAPTILER_API_KEY;
 
 const validateCampground = (req, res, next) => {
     const campgroundSchema = Joi.object({
@@ -52,6 +54,7 @@ router.get('/new', requireLogin, (req, res) => {
 
 
 router.post('/', requireLogin, storeInCloud.array('images'), validateCampground, wrapAsync(async (req, res, next) => {
+    const geoData = await maptilerClient.geocoding.forward(req.body.campground.loc, { limit: 1 });
     const images = [];
 
     for (const file of req.files) {
@@ -62,6 +65,8 @@ router.post('/', requireLogin, storeInCloud.array('images'), validateCampground,
     const newCamp = new Campground(req.body.campground);
     newCamp.author = req.session.user_id;
     newCamp.images = images;
+    newCamp.geometry = geoData.features[0].geometry;
+
     console.log(newCamp);
     await newCamp.save();
     req.flash('success', 'Successfully created a new campground!');
@@ -137,6 +142,14 @@ router.delete('/:id', requireLogin, isAuthor, wrapAsync(async (req, res, next) =
     req.flash('success', 'Deletion of campground successful!');
     res.redirect(`/campgrounds`);
 }));
+
+router.delete('/:id/delete/:image_id', wrapAsync(async (req, res, next) => {
+    const { campgroundId, imageId } = req.params;
+    const campground = await Campground.findById(campgroundId);
+    campground.images = campground.images.filter(image => image._id.toString() !== imageId)
+    await campground.save();
+    res.status(200).json({ message: 'Image deleted successfully' });
+}))
 
 
 
