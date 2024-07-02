@@ -4,6 +4,7 @@ const User = require('./user');
 const { coordinates } = require('@maptiler/client');
 const Schema = mongoose.Schema;
 
+const options = {toJSON: {virtuals: true}};
 
 const Campground = new Schema({
     title: String,
@@ -28,6 +29,10 @@ const Campground = new Schema({
         type: Schema.Types.ObjectId, ref: 'User',
     },
     reviews: [{ type: Schema.Types.ObjectId, ref: 'Review' }]
+},options)
+
+Campground.virtual('properties.popUpMarkup').get(function(){
+    return `<a href='/campgrounds/${this.id}'>${this.title}</a>`
 })
 
 Campground.post('findOneAndDelete', async function (doc) {

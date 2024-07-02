@@ -1,5 +1,7 @@
 <% layout('Boilerplate') -%>
     <h1> All campgrounds </h1>
+    <div id="cluster-map" style="width:100%
+ ; height:500px"></div>
     <% for(let camp of campgrounds) {%>
         <div class="card mb-3">
             <div class="row">
@@ -26,3 +28,10 @@
         </div>
         <% }%>
             </ul>
+
+<script>
+    const mapToken = '<%-process.env.MAPTILER_API_KEY%>';
+    const campgroundList = {features: <%-JSON.stringify(campgrounds)%>}
+</script>
+
+<script src="/clusterMap.js"></script>
