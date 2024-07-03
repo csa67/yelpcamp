@@ -1,5 +1,5 @@
 ## Introduction
-YelpCamp is a full-stack web application designed to allow users to share and review campgrounds. The application offers a user-friendly interface for adding, viewing, and reviewing campgrounds. It leverages modern web development technologies to provide a seamless user experience.
+YelpCamp is a comprehensive full-stack web application designed for camping enthusiasts. It allows users to share and review campgrounds, providing a platform to discover new camping spots and read reviews from other users. The application features a user-friendly interface and robust functionality, ensuring a seamless and interactive experience. Users can create accounts, post campgrounds, upload images, write reviews, and view interactive maps of campground locations. With a focus on security and efficiency, YelpCamp employs modern web technologies to deliver a high-quality service.
 
 ## Features
 - User authentication and authorization.
